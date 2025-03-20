@@ -2,6 +2,7 @@ package com.example.starwarsplanets.ui.splash
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,9 +17,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.starwarsplanets.R
 import kotlinx.coroutines.delay
 
 @Composable
@@ -40,19 +45,20 @@ fun SplashScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary),
+            .background(Color.White)
+        ,
         contentAlignment = Alignment.Center
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                imageVector = Icons.Default.Home,
-                contentDescription = "Star Wars",
+            Image(
+                painter = painterResource(id = R.drawable.star_wars_logo),
+                contentDescription = "App Logo",
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(200.dp)
                     .alpha(alphaAnim.value),
-                tint = MaterialTheme.colorScheme.onPrimary
+                contentScale = ContentScale.Fit
             )
 
             Text(
