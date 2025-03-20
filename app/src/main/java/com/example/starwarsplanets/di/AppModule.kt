@@ -5,6 +5,7 @@ import com.example.starwarsplanets.data.api.SwapiService
 import com.example.starwarsplanets.data.local.PlanetDao
 import com.example.starwarsplanets.data.local.PlanetDatabase
 import com.example.starwarsplanets.data.repository.PlanetRepository
+import com.example.starwarsplanets.util.NetworkConnectivityUtil
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -65,5 +66,12 @@ object AppModule {
         planetDao: PlanetDao
     ): PlanetRepository {
         return PlanetRepository(swapiService, planetDao)
+    }
+
+
+    @Provides
+    @Singleton
+    fun provideNetworkConnectivityUtil(@ApplicationContext context: Context): NetworkConnectivityUtil {
+        return NetworkConnectivityUtil(context)
     }
 }

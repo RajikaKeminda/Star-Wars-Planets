@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.starwarsplanets.data.models.Planet
 import com.example.starwarsplanets.data.repository.NetworkResult
 import com.example.starwarsplanets.data.repository.PlanetRepository
+import com.example.starwarsplanets.util.NetworkConnectivityUtil
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class PlanetListViewModel @Inject constructor(
-    private val repository: PlanetRepository
+    private val repository: PlanetRepository,
+    private val networkConnectivityUtil: NetworkConnectivityUtil
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PlanetListUiState>(PlanetListUiState.Loading)
@@ -25,10 +27,15 @@ class PlanetListViewModel @Inject constructor(
     private val planetsList = mutableListOf<Planet>()
 
     init {
-        loadPlanets(forceRefresh = true)
+        if(networkConnectivityUtil.isNetworkAvailable()) {
+            loadPlanets(forceRefresh = true)
+        } else {
+            loadPlanets(forceRefresh = false)
+        }
+
     }
 
-    fun loadPlanets(forceRefresh: Boolean = false) {
+    fun loadPlanets(forceRefresh: Boolean = true) {
         if (isLoadingMore) return
 
         isLoadingMore = true
@@ -58,7 +65,7 @@ class PlanetListViewModel @Inject constructor(
 
                             _uiState.value = PlanetListUiState.Success(
                                 planets = planetsList,
-                                canLoadMore = repository.hasNextPage()
+                                canLoadMore = if (forceRefresh) repository.hasNextPage() else false
                             )
                         }
 
@@ -87,7 +94,7 @@ class PlanetListViewModel @Inject constructor(
     fun loadNextPage() {
         if (!isLoadingMore && repository.hasNextPage()) {
             currentPage++
-            loadPlanets(forceRefresh = false)
+            loadPlanets(forceRefresh = true)
         }
     }
 

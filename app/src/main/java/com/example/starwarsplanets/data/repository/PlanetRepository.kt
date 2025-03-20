@@ -32,30 +32,44 @@ class PlanetRepository @Inject constructor(
     ): Flow<NetworkResult> = flow<NetworkResult> {
         emit(NetworkResult.Loading())
 
-        try {
-            val response = swapiService.getPlanets(page)
-            nextPageUrl = response.next
-
-            val planets = response.results.map { planet ->
-                val imageId =  Random.nextInt(1, 1000)
-                planet.imageUrl = "https://picsum.photos/id/$imageId/200/200"
-                planet
+        if (!forceRefresh) {
+            val cachedPlanets = planetDao.getAllPlanets().map { entities ->
+                entities.map { it.toDomain() }
             }
 
-            // Caching data
-            val planetEntities = planets.map { value ->
-                value.toEntity()
+            // Collect and emit cached data
+            cachedPlanets.collect { planets ->
+                if (planets.isNotEmpty()) {
+                    emit(NetworkResult.Success(planets))
+                }
             }
+        } else {
+            try {
+                val response = swapiService.getPlanets(page)
+                nextPageUrl = response.next
 
-            if (page == 1 || page == null) {
-                planetDao.clearAllPlanets()
+                val planets = response.results.map { planet ->
+                    val imageId = Random.nextInt(1, 1000)
+                    planet.imageUrl = "https://picsum.photos/id/$imageId/200/200"
+                    planet
+                }
+
+                // Caching data
+                val planetEntities = planets.map { value ->
+                    value.toEntity()
+                }
+
+//                if (page == 1 || page == null) {
+//                    planetDao.clearAllPlanets()
+//                }
+                planetDao.insertPlanets(planetEntities)
+
+                emit(NetworkResult.Success(planets))
+            } catch (e: Exception) {
+                emit(NetworkResult.Error(e.message ?: "Request Failed"))
             }
-            planetDao.insertPlanets(planetEntities)
-
-            emit(NetworkResult.Success(planets))
-        } catch (e: Exception) {
-            emit(NetworkResult.Error(e.message ?: "Request Failed"))
         }
+
 
     }.flowOn(Dispatchers.IO)
 
