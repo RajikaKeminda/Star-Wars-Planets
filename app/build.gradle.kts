@@ -70,6 +70,7 @@ dependencies {
 
     // image loading
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
 
     // Offline caching
     implementation(libs.androidx.room.runtime)

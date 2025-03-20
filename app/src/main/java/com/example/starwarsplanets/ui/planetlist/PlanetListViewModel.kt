@@ -80,7 +80,9 @@ class PlanetListViewModel @Inject constructor(
                             }
                         }
 
-                        is NetworkResult.Loading -> TODO()
+                        is NetworkResult.Loading -> {
+                            println("Loading ================")
+                        }
                     }
                 }
         }

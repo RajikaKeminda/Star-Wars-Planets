@@ -5,6 +5,6 @@ import retrofit2.http.GET
 import retrofit2.http.Query
 
 interface SwapiService {
-    @GET("/planets")
+    @GET("planets")
     suspend fun getPlanets(@Query("page") page: Int? = null): PlanetResponse
 }
