@@ -8,11 +8,13 @@ import com.example.starwarsplanets.data.models.Planet
 import androidx.compose.material3.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.*
@@ -32,8 +34,29 @@ fun PlanetListScreen(
     val uiState by viewModel.uiState.collectAsState()
     val listState = rememberLazyListState()
 
-    val showTopShadow by remember {
-        derivedStateOf { listState.firstVisibleItemIndex > 0 }
+    val isAtEnd by remember {
+        derivedStateOf {
+            val layoutInfo = listState.layoutInfo
+            val totalItemsCount = layoutInfo.totalItemsCount
+            val lastVisibleItemIndex = (layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0) + 1
+
+            lastVisibleItemIndex > 0 && lastVisibleItemIndex >= totalItemsCount - 2
+        }
+    }
+
+    LaunchedEffect(isAtEnd) {
+        if (isAtEnd) {
+            when (val state = uiState) {
+
+                is PlanetListUiState.Success -> {
+                    if (state.canLoadMore) {
+                        viewModel.loadNextPage()
+                    }
+                }
+
+                else -> {} // Handle other states
+            }
+        }
     }
 
     Scaffold(
@@ -62,13 +85,17 @@ fun PlanetListScreen(
                         modifier = Modifier.align(Alignment.Center)
                     )
                 }
+
                 is PlanetListUiState.Success -> {
                     val planets = (uiState as PlanetListUiState.Success).planets
                     PlanetList(
+                        state = listState,
                         planets = planets,
-                        onPlanetClick = onPlanetClick
+                        onPlanetClick = onPlanetClick,
+                        canLoadMore = (uiState as PlanetListUiState.Success).canLoadMore,
                     )
                 }
+
                 is PlanetListUiState.Error -> {
                     val errorMessage = (uiState as PlanetListUiState.Error).message
                     ErrorView(
@@ -77,9 +104,11 @@ fun PlanetListScreen(
                     )
                 }
 
-                is PlanetListUiState.LoadingMore -> TODO()
-
-
+                is PlanetListUiState.LoadingMore -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
             }
         }
     }
@@ -87,18 +116,39 @@ fun PlanetListScreen(
 
 @Composable
 fun PlanetList(
+    state: LazyListState,
     planets: List<Planet>,
-    onPlanetClick: (Planet) -> Unit
+    onPlanetClick: (Planet) -> Unit,
+    canLoadMore: Boolean,
 ) {
     LazyColumn(
+        state = state,
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        items(planets) { planet ->
+        items(
+            items = planets,
+            key = { planet -> planet.url } // Use unique URL as key to prevent duplicates
+        ) { planet ->
             PlanetCard(
                 planet = planet,
                 onClick = { onPlanetClick(planet) }
             )
+        }
+
+        if (canLoadMore) {
+            item(key = "loading") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+            }
         }
     }
 }

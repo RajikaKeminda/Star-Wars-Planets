@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlanetListViewModel @Inject constructor(
     private val repository: PlanetRepository
-): ViewModel() {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow<PlanetListUiState>(PlanetListUiState.Loading)
     val uiState: StateFlow<PlanetListUiState> = _uiState
@@ -30,14 +30,6 @@ class PlanetListViewModel @Inject constructor(
 
     fun loadPlanets(forceRefresh: Boolean = false) {
         if (isLoadingMore) return
-
-        if (forceRefresh) {
-            currentPage = 1
-            planetsList.clear()
-            _uiState.value = PlanetListUiState.Loading
-        } else {
-            _uiState.value = PlanetListUiState.LoadingMore(planetsList)
-        }
 
         isLoadingMore = true
 
@@ -55,9 +47,9 @@ class PlanetListViewModel @Inject constructor(
                     }
                 }
                 .collect { result ->
-                    isLoadingMore = false
                     when (result) {
                         is NetworkResult.Success -> {
+                            isLoadingMore = false
                             val newPlanets = result.data
                             if (currentPage == 1) {
                                 planetsList.clear()
@@ -69,9 +61,12 @@ class PlanetListViewModel @Inject constructor(
                                 canLoadMore = repository.hasNextPage()
                             )
                         }
+
                         is NetworkResult.Error -> {
+                            isLoadingMore = false
                             if (planetsList.isEmpty()) {
-                                _uiState.value = PlanetListUiState.Error(result.message ?: "Unknown error")
+                                _uiState.value =
+                                    PlanetListUiState.Error(result.message ?: "Unknown error")
                             } else {
                                 _uiState.value = PlanetListUiState.Success(
                                     planets = planetsList,
@@ -81,7 +76,8 @@ class PlanetListViewModel @Inject constructor(
                         }
 
                         is NetworkResult.Loading -> {
-                            println("Loading ================")
+                            isLoadingMore = true
+                            _uiState.value = PlanetListUiState.LoadingMore(planetsList)
                         }
                     }
                 }
@@ -100,9 +96,17 @@ class PlanetListViewModel @Inject constructor(
     }
 }
 
+
+class PaginatedState {
+    val items: List<Planet> = emptyList()
+    val isLoading: Boolean = false
+}
+
 sealed class PlanetListUiState {
     object Loading : PlanetListUiState()
     data class LoadingMore(val planets: List<Planet>) : PlanetListUiState()
-    data class Success(val planets: List<Planet>, val canLoadMore: Boolean = false) : PlanetListUiState()
+    data class Success(val planets: List<Planet>, val canLoadMore: Boolean = false) :
+        PlanetListUiState()
+
     data class Error(val message: String) : PlanetListUiState()
 }

@@ -32,18 +32,6 @@ class PlanetRepository @Inject constructor(
     ): Flow<NetworkResult> = flow<NetworkResult> {
         emit(NetworkResult.Loading())
 
-        if (!forceRefresh) {
-            val cashedResults =
-                planetDao.getAllPlanets().map { value -> value.map { it.toDomain() } }
-
-            cashedResults.collect { planets ->
-                if (planets.isNotEmpty()) {
-                    emit(NetworkResult.Success(planets))
-
-                }
-            }
-        }
-
         try {
             val response = swapiService.getPlanets(page)
             nextPageUrl = response.next
