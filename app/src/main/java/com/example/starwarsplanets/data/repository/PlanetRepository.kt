@@ -4,6 +4,7 @@ import com.example.starwarsplanets.data.api.SwapiService
 import com.example.starwarsplanets.data.local.PlanetDao
 import com.example.starwarsplanets.data.local.toDomain
 import com.example.starwarsplanets.data.local.toEntity
+import com.example.starwarsplanets.data.models.Planet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -13,7 +14,7 @@ import javax.inject.Inject
 import kotlin.random.Random
 
 sealed class NetworkResult {
-    class Success<T>(val data: T) : NetworkResult()
+    class Success(val data: List<Planet>) : NetworkResult()
     class Error(val message: String) : NetworkResult()
     class Loading : NetworkResult()
 }
