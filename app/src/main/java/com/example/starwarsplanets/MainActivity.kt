@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.starwarsplanets.ui.theme.StarWarsPlanetsTheme
+import dagger.hilt.android.HiltAndroidApp
 
+
+@HiltAndroidApp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

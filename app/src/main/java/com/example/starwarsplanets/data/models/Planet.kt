@@ -13,5 +13,5 @@ data class Planet(
     val climate: String,
     val gravity: String,
     val url: String,
-    val imageUrl: String,
+    var imageUrl: String,
 )
