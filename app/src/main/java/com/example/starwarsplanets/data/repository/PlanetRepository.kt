@@ -31,7 +31,6 @@ class PlanetRepository @Inject constructor(
         forceRefresh: Boolean = false
     ): Flow<NetworkResult> = flow<NetworkResult> {
         emit(NetworkResult.Loading())
-
         if (!forceRefresh) {
             val cachedPlanets = planetDao.getAllPlanets().map { entities ->
                 entities.map { it.toDomain() }
@@ -59,9 +58,6 @@ class PlanetRepository @Inject constructor(
                     value.toEntity()
                 }
 
-//                if (page == 1 || page == null) {
-//                    planetDao.clearAllPlanets()
-//                }
                 planetDao.insertPlanets(planetEntities)
 
                 emit(NetworkResult.Success(planets))
