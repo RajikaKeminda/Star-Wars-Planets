@@ -11,6 +11,13 @@ A modern Android application that displays information about planets from the St
 - **Modern UI**: Clean and intuitive interface built with Jetpack Compose
 
 
+
+
+
+https://github.com/user-attachments/assets/8e76a927-c6d1-4eb4-829f-8f1da07f9aa1
+
+
+
 ## Technologies & Architecture
 
 This application is built using:
