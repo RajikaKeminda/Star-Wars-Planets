@@ -128,7 +128,7 @@ fun PlanetList(
     ) {
         items(
             items = planets,
-            key = { planet -> planet.url } // Use unique URL as key to prevent duplicates
+            key = { planet -> planet.url }
         ) { planet ->
             PlanetCard(
                 planet = planet,
