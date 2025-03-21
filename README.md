@@ -60,6 +60,7 @@ app/
 ### Prerequisites
 
 - Android SDK 24 or higher
+- Java Version 11
 
 ### Installation
 
